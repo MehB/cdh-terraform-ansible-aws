@@ -1,9 +1,5 @@
 # Cloudera CDH Cluster Installation in AWS using Terraform and Ansible
 
-![alt text](images/cloudera_0.png) ![alt text](images/tf_aws.png) 
-
-![alt text](images/Ansible_logo.png)
-
 This repository contains a Terraform and an Ansible project to deploy a CDH cluster in Amazon AWS. 
 
 First, we provision an complete architecture with 5 nodes in AWS using Terraform 
