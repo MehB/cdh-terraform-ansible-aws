@@ -1,0 +1,15 @@
+---
+
+- name: Install Cloudera Manager Agents packages
+  yum:
+    name: "{{item}}"
+    state: installed
+  with_items:
+    - cloudera-manager-daemons
+    - cloudera-manager-agent
+
+- name: Restart Cloudera Manager Agents
+  service:
+    name: cloudera-scm-agent
+    state: restarted
+    enabled: yes

@@ -1,0 +1,56 @@
+---
+# Cloudera playbook
+
+- name: OS Configuration
+  become: ansible_become
+  hosts: cdh_servers
+  roles:
+      - os_config
+  tags: os_config
+
+- name: Configure Cloudera Manager Repository
+  become: ansible_become
+  hosts: cdh_servers
+  roles:
+    - cm_repo
+  tags: cm_repo
+
+- name: Configure Epel repository
+  become: ansible_become
+  hosts: cdh_servers
+  roles:
+    - epel
+  tags: epel_repo
+
+- name: Install Java JDK 7
+  become: ansible_become
+  hosts: cdh_servers
+  roles:
+    - java
+  tags: java
+
+- name: Install MySQL Java Connector
+  become: ansible_become
+  hosts: cdh_servers
+  roles:
+    - mysql_connector
+  tags: mysql_java_connector
+
+- name: Install MariaDB and create databases
+  hosts: db_server
+  roles:
+    - mariadb
+  tags: mysql
+
+# ##############
+- name: Install Cloudera Manager Agents
+  hosts: cdh_servers
+  roles:
+    - cm_agents
+  tags: cm_agents
+
+- name: Install Cloudera Manager Server
+  hosts: cdh_manager
+  roles:
+    - scm
+  tags: cluster_template

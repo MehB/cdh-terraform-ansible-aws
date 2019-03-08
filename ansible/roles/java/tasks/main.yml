@@ -1,0 +1,52 @@
+---
+- name: Create directories
+  file:
+    path: "{{ item }}"
+    state: directory
+  with_items:
+    - "{{ java_download_folder }}"
+    - "/usr/share/java"
+
+- name: Creates directory
+  file:
+    path:  "{{ java_download_folder }}"
+    state: directory
+
+
+- name: Download Java
+  get_url:
+    url: "{{ java_download_url }}"
+    dest: "{{ java_archive }}"
+    #headers: "Cookie:' gpw_e24=http%3A%2F%2Fwww.oracle.com%2F; oraclelicense=accept-securebackup-cookie'"
+    validate_certs: no
+
+- name: Unarchive Java archive
+  unarchive:
+    src: "{{ java_archive }}"
+    dest: "{{ java_download_folder }}"
+    copy: no
+
+- name: Fix ownership
+  file:
+    state: directory
+    path: "{{ java_name }}"
+    owner: root
+    group: root
+    recurse: yes
+
+- name: Make Java available for system with alternatives
+  command: 'alternatives --install "/usr/bin/java" "java" "{{java_name}}/bin/java" 2'
+
+- name: Clean up Java download
+  file:
+    state: absent
+    path: "{{java_archive}}"
+
+- name: Add java home path
+  blockinfile:
+    dest: /etc/profile
+    block: |
+      export JAVA_HOME=/usr/java/jdk1.7.0_80
+      export PATH=$JAVA_HOME/bin:$PATH
+      regexp: "JAVA_HOME"
+    state: present

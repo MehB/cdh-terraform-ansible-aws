@@ -1,0 +1,28 @@
+---
+
+
+db_hostname: "{{ hostvars[groups['db_server'][0]]['inventory_hostname'] }}"
+scm_hostname: "{{ hostvars[groups['cdh_manager'][0]]['inventory_hostname'] }}"
+
+cdh_version: 5.15.1
+cluster_display_name: cluster_1
+
+# Users and Groups
+group:
+  - dbi
+user:
+  - dbi
+
+# Java variables
+java_download_url: http://cdn-files.evildayz.com/mirror/java/jdk_7u80/jdk-7u80-linux-x64.tar.gz
+java_download_folder: /usr/java
+java_name: "{{java_download_folder}}/jdk1.7_80"
+java_archive: "{{java_download_folder}}/jdk-7u80-linux-x64.tar.gz"
+
+# Mysql Java connector
+mysql_java: mysql-connector-java-5.1.46
+mysql_java_download_url: https://dev.mysql.com/get/Downloads/Connector-J/"{{mysql_java_archive}}"
+mysql_java_download_folder: /usr/share/mysql-java/
+mysql_java_archive: "{{ mysql_java_download_folder }}/{{ mysql_java }}.tar.gz"
+
+mysql_java_jar: /usr/share/java/mysql-connector-java.jar

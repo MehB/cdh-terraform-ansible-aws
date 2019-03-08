@@ -1,0 +1,6 @@
+---
+
+- name: Add Cloudera repo
+  template:
+    src: ../templates/cloudera-manager.repo.j2
+    dest: "/etc/yum.repos.d/cloudera-manager{{cdh_version}}.repo"

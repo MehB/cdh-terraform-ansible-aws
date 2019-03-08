@@ -1,0 +1,25 @@
+
+[db_server]
+.internal ansible_host= id=6
+
+[cdh_manager]
+.ec2.internal ansible_host= id=6
+
+[cdh_master]
+.ec2.internal ansible_host=  id=5
+
+[cdh_worker]
+.ec2.internal ansible_host=  id=2
+.internal ansible_host=  id=3
+.ec2.internal ansible_host= id=4
+
+
+[cdh_servers:children]
+cdh_worker
+cdh_master
+cdh_manager
+
+
+[all:vars]
+ansible_user=centos
+ansible_ssh_private_key_file=.pem

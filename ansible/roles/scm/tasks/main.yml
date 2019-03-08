@@ -1,0 +1,32 @@
+---
+
+- include_vars: ../../../group_vars/db_server.yml
+
+- name: Install the Cloudera Manager Server Packages
+  yum:
+    name: "{{ item }}"
+    state: installed
+  with_items:
+    - cloudera-manager-daemons
+    - cloudera-manager-server
+
+- name: Prepare Cloudera Manager Server External Database
+  command: sudo /usr/share/cmf/schema/scm_prepare_database.sh
+             -f
+             --host {{ hostvars[db_hostname]['inventory_hostname'] }}
+             mysql {{ databases.scm.name }} {{ databases.scm.user }} {{ databases.scm.pass }}
+  changed_when: False
+
+- name: Start the Cloudera Manager Server
+  service:
+    name: "{{ item }}"
+    state: restarted
+    enabled: yes
+  notify:
+    - wait cloudera-scm-server
+  with_items:
+    - cloudera-scm-server
+    - cloudera-scm-agent
+
+# Trigger handler to wait for SCM to startup
+- meta: flush_handlers

@@ -1,0 +1,31 @@
+---
+- name: Check if MySQL connector present
+  file:
+    path: "{{ mysql_java }}"
+    state: absent
+
+- name: Create MySQL Java Downlaod director
+  file:
+    path:  "{{ mysql_java_download_folder }}"
+    state: directory
+
+- name: Download MySQL Java Connector
+  get_url:
+    url: "{{ mysql_java_download_url }}"
+    dest: "{{ mysql_java_download_folder }}"
+
+
+- name: Ensure /usr/share/java/ exists
+  file:
+    dest: /usr/share/java/
+    state: directory
+    mode: 0775
+
+- name: Unarchive MySQL Connector
+  unarchive:
+    src: "{{ mysql_java_archive }}"
+    dest: "{{ mysql_java_download_folder }}"
+    copy: no
+
+- name: Move jar
+  command: cp "{{ mysql_java_download_folder }}"/"{{ mysql_java }}"/mysql-connector-java-5.1.46-bin.jar "{{ mysql_java_jar }}"

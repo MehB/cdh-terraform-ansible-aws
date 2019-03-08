@@ -1,0 +1,141 @@
+---
+- name: Install the libselinux-python package
+  yum:
+    name: libselinux-python
+    state: present
+
+- name: Create admins group
+  group:
+    name: admins
+    system: yes
+    state: present
+
+- name: make sure we can sudo as admin group
+  lineinfile: dest=/etc/sudoers state=present regexp='^%admins' line='%admins ALL=(ALL) NOPASSWD:ALL'
+
+- name: also make sure ssh-agent works via sudo
+  lineinfile: dest=/etc/sudoers state=present regexp='^Defaults env_keep\+\=SSH_AUTH_SOCK' line='Defaults env_keep+=SSH_AUTH_SOCK'
+
+# ############ USER CREATION SECTION ################################
+#
+#     - name: Create user
+#       user:
+#         name: "{{item}}"
+#         shell: /bin/bash
+#         uid: 1050
+#         password: "{{ root_pwd }}"
+#         groups: admins
+#       sudo : yes
+#       with_items: "{{user}}"
+#
+# ##################################################################
+
+- name: Add user into groups
+  user:
+    name: "{{ item }}"
+    comment: "Test User"
+    groups: wheel, admins
+    append: yes
+  with_items: "{{ user }}"
+
+- name: Final sudoers file check
+  shell: visudo -q -c -f /etc/sudoers
+
+- name: "Build hosts file"
+  lineinfile:
+    dest: /etc/hosts
+    regexp: '.*{{ item }}$'
+    line: "{{ hostvars[item]['ansible_default_ipv4']['address'] }} {{item}}"
+    state: present
+  when: hostvars[item]['ansible_default_ipv4']['address'] is defined
+  with_items: "{{ groups['all'] }}"
+
+- name: Disable transparent huge page - defrag
+  shell: echo "never" > /sys/kernel/mm/transparent_hugepage/defrag
+
+- name: Disable transparent huge page - enabled
+  shell: echo "never" > /sys/kernel/mm/transparent_hugepage/enabled
+
+- name: VM swappiness - 1
+  shell: echo "1" > /proc/sys/vm/swappiness
+
+- name: Set VM swappiness - 2
+  sysctl:
+    name: vm.swappiness
+    value: 1
+    state: present
+
+- name: Create /data dir
+  file:
+    path: /data
+    state: directory
+    mode: 0775
+    owner: centos
+    group: centos
+
+- name: Create file system on volume
+  filesystem:
+    fstype: ext4
+    dev: /dev/xvdb
+
+- name: Mount volume as /data
+  mount:
+    name: /data
+    src: /dev/xvdb
+    fstype: ext4
+    opts: defaults,noatime
+    state: mounted
+
+- name: install the latest version of ntp
+  yum:
+    name: ntp
+    state: latest
+
+- name: install the latest version of nscd
+  yum:
+    name: nscd
+    state: latest
+
+- name: install wget
+  yum:
+    name: wget
+    state: latest
+
+- name: Install the libselinux-python package
+  yum:
+    name: libselinux-python
+    state: present
+
+- name: Disable SELinux
+  selinux:
+    state: disabled
+
+- name: Start service ntpd, if not running
+  service:
+    name: ntpd
+    state: started
+
+- name: Start service nscd, if not running
+  service:
+    name: nscd
+    state: started
+  register: task_result
+
+- name: Reboot immediately if there was a change.
+  shell: "sleep 5 && reboot"
+  async: 1
+  poll: 0
+  when: task_result is changed
+
+- name: Wait for the reboot to complete if there was a change.
+  wait_for_connection:
+    connect_timeout: 20
+    sleep: 5
+    delay: 5
+    timeout: 300
+  when: task_result is changed
+
+# - name: Disable Transparent Huge Pages in Grub 2
+#  lineinfile: dest=/etc/default/grub
+#              state=present
+#              line='GRUB_CMDLINE_LINUX=$GRUB_CMDLINE_LINUX" transparent_hugepage=never"'
