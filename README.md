@@ -9,5 +9,4 @@ First, we provision an complete architecture with 5 nodes in AWS using Terraform
 
 After the provisionning part, we install a CDH cluster in the new infrastructure, including pre-requisites. 
 
-For more information about Cloudera installation steps follow this link: (Cloudera-Install_Doc)[https://github.com/MehB/Cloudera-Install_Doc/blob/master/installation_steps.md]
-
+For more information about Cloudera installation steps follow this link: [Cloudera-Install_Doc](https://github.com/MehB/Cloudera-Install_Doc/blob/master/installation_steps.md)
